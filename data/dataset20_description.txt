@@ -1,0 +1,27 @@
+E-SCOOTER DATASET
+
+----------------------------------------------
+
+Dataset description:
+The data is compiled from cities, towns, and small villages in Germany, Austria, and Switzerland, classified according to the profitability of e-scooter companies active in that location. There are thirteen different features associated with each location. The goal is to predict the profitability of an e-scooter company (feature "class") from the other features.
+
+Attention!
+Please notice that the data has been artificially generated. The dataset does not reflect real-world statistical correlations between features and labels.
+
+	Number of samples: 500
+	Number of features: 13 (numeric and strings) + one column of class labels (0,1,2)
+	Features description:
+		pub_trans: public transport index
+		price: price to rent per km
+		temperature: average tempereture during summer
+		inhabitants: number of inhabitants
+		registered: number of registered users in thousand
+		country: country
+		id: internal dataset code
+		nr_counterparts: nr_counterparts
+		cars: number of cars per inhabitant
+		labour_cost: average labour cost in thousand per month
+		humidity: absolute humidity in g/m3
+		windspeed: average wind speed in km/h
+		size: size of city center in km2
+		class: profitability (0 = loss, 1 = balanced, 2 = profit) <--- LABEL TO PREDICT
