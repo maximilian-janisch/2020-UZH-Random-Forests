@@ -1,4 +1,3 @@
-# TODO: Im Moment ist dieser Helfer-Code ab Zeile 49 *nicht* von mir geschrieben
 import numpy as np
 
 
@@ -43,10 +42,10 @@ class Splitter:
         else:
             feature_subset = np.arange(p)
 
-        # Loop through all features
+        # Loop through all features of the subset
         for idx in feature_subset:
-            # Sort data along selected feature.
-            thresholds, classes = zip(*sorted(zip(X[:, idx], y)))
+            # Sort data along selected feature
+            threshholds, features = zip(*sorted(zip(X[:, idx], y)))
 
             # We could actually split the node according to each feature/threshold pair
             # and count the resulting population for each class in the children, but
@@ -55,7 +54,7 @@ class Splitter:
             num_left = [0] * self.n_classes
             num_right = class_count.copy()
             for i in range(1, m):  # possible split positions
-                c = classes[i - 1]
+                c = features[i - 1]
                 num_left[c] += 1
                 num_right[c] -= 1
                 gini_left = 1.0 - sum(
@@ -65,19 +64,15 @@ class Splitter:
                     (num_right[x] / (m - i)) ** 2 for x in range(self.n_classes)
                 )
 
-                # The Gini impurity of a split is the weighted average of the Gini
-                # impurity of the children.
+                # the Gini impurity of a split is the weighted average of the Gini impurity of the children.
                 gini = (i * gini_left + (m - i) * gini_right) / m
 
-                # The following condition is to make sure we don't try to split two
-                # points with identical values for that feature, as it is impossible
-                # (both have to end up on the same side of a split).
-                if thresholds[i] == thresholds[i - 1]:
+                if threshholds[i] == threshholds[i - 1]:  # avoid points that are identical to split to different sides
                     continue
 
-                if gini < best_gini:
+                if gini < best_gini:  # minimal gini found
                     best_gini = gini
                     best_idx = idx
-                    best_thr = (thresholds[i] + thresholds[i - 1]) / 2  # midpoint
+                    best_thr = (threshholds[i] + threshholds[i - 1]) / 2  # midpoint
 
         return best_idx, best_thr

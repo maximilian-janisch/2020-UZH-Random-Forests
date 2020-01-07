@@ -21,9 +21,16 @@ class Tree:
 
 
 class DecisionTreeClassifier:
-    def __init__(self, max_depth: int, max_features: int="all"):
+    def __init__(self, max_depth: int=np.Inf, max_features: int="all", min_samples: int=2):
+        """
+        Initializes the DecisionTreeClassifer class
+        :param max_depth: Maximum height of the tree. Default is np.Inf, which fully expands the tree
+        :param max_features: Size of the subset of features to randomly choose at each node while fitting
+        :param min_samples: Minimum number of features in order to allow splitting of a node
+        """
         self.max_depth = max_depth
         self.max_features = max_features
+        self.min_samples = min_samples
 
         self.ctree: Tree = None
 
@@ -40,7 +47,7 @@ class DecisionTreeClassifier:
             The old node gets removed from the queue and the new nodes get added to it
             """
             c, X, y, d = queue.pop(0)
-            if len(np.unique(y)) <= 1 or d + 1 >= self.max_depth or len(np.unique(y)) == 1:
+            if len(np.unique(y)) <= 1 or d + 1 >= self.max_depth or len(y) <= self.min_samples:
                 # Exceeding of the maximum depth of the tree or no more data left
                 continue
 
@@ -81,7 +88,7 @@ if __name__ == '__main__':  # Test
     digits = load_digits()
     X = digits.data
     y = digits.target
-    classifier = DecisionTreeClassifier(7, 15)
+    classifier = DecisionTreeClassifier(max_features=15)
     classifier.fit(X, y)
 
     correct = np.sum(y == classifier.predict(X))
