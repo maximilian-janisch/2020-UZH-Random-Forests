@@ -50,7 +50,7 @@ class Splitter:
         # Loop through all features of the subset
         for idx in feature_subset:
             # Sort data along selected feature
-            threshholds, features = zip(*sorted(zip(X[:, idx], y)))
+            thresholds, features = zip(*sorted(zip(X[:, idx], y)))
 
             # We could actually split the node according to each feature/threshold pair
             # and count the resulting population for each class in the children, but
@@ -72,12 +72,12 @@ class Splitter:
                 # the Gini impurity of a split is the weighted average of the Gini impurity of the children.
                 gini = (i * gini_left + (m - i) * gini_right) / m
 
-                if threshholds[i] == threshholds[i - 1]:  # avoid points that are identical to split to different sides
+                if thresholds[i] == thresholds[i - 1]:  # avoid points that are identical to split to different sides
                     continue
 
                 if gini < best_gini:  # minimal gini found
                     best_gini = gini
                     best_idx = idx
-                    best_thr = (threshholds[i] + threshholds[i - 1]) / 2  # midpoint
+                    best_thr = (thresholds[i] + thresholds[i - 1]) / 2  # midpoint
 
         return best_idx, best_thr
