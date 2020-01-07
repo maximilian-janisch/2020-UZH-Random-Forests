@@ -65,16 +65,16 @@ class DecisionTreeClassifier:
             queue.extend([(left_c, x_left, y_left, d + 1), (right_c, x_right, y_right, d + 1)])
         self.ctree = base
 
-    def predict(self, x):
-        return np.apply_along_axis(self.__prediction_for_row, axis=1, arr=x).astype(int)
+    def predict(self, X):
+        return np.apply_along_axis(self.__prediction_for_row, axis=1, arr=X).astype(int)
 
-    def __prediction_for_row(self, data_row):
+    def __prediction_for_row(self, x):
         base = self.ctree
         if base is None:  # tree hasn't been fitted yet
             raise Exception("This tree hasn't been fitted yet")
 
         while base.feature_index is not None:
-            if data_row[base.feature_index] < base.cutoff:
+            if x[base.feature_index] < base.cutoff:
                 base = base.left
             else:
                 base = base.right
@@ -88,7 +88,7 @@ if __name__ == '__main__':  # Test
     digits = load_digits()
     X = digits.data
     y = digits.target
-    classifier = DecisionTreeClassifier(max_features=15)
+    classifier = DecisionTreeClassifier(max_features=8)
     classifier.fit(X, y)
 
     correct = np.sum(y == classifier.predict(X))

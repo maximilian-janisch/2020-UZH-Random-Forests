@@ -8,7 +8,7 @@ class Splitter:
         :param n_classes: Number of distinct labels y_i
         :param max_features: Number of features to randomly choose at each node when performing a split. If set to "all"
         then all features are used. If max_features is larger than the number of available features, all features are
-        used too.
+        used too. Setting max_features to sqrt will lead to sqrt(n_features) to be used.
         """
         self.n_classes = n_classes
         self.max_features = max_features
@@ -35,12 +35,17 @@ class Splitter:
         best_gini = 1.0 - sum((n / m) ** 2 for n in class_count)  # Gini impurity of current split
         best_idx, best_thr = None, None
 
-        if isinstance(self.max_features, int) and self.max_features <= p:
-            feature_subset = np.sort(
-                np.random.choice(np.arange(p), size=self.max_features, replace=False)
-            )
-        else:
-            feature_subset = np.arange(p)
+        if self.max_features == "all":
+            self.max_features = p
+        elif self.max_features == "sqrt":
+            self.max_features = int(np.round(np.sqrt(p)))
+        elif self.max_features > p:
+            self.max_features = p
+
+        feature_subset = np.sort(
+            np.random.choice(np.arange(p), size=self.max_features, replace=False)
+        )
+
 
         # Loop through all features of the subset
         for idx in feature_subset:
