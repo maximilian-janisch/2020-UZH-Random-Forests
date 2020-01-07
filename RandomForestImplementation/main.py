@@ -1,6 +1,6 @@
 import numpy as np
 
-from RandomForestImplementation.helpers import best_split
+from RandomForestImplementation.helpers import Splitter
 
 
 class Tree:
@@ -20,24 +20,26 @@ class Tree:
             return f"Terminal node with prediction {int(self.prediction)}"
 
 
-class DecisionTreeClassifier(object):
-    def __init__(self, max_depth: int):
+class DecisionTreeClassifier:
+    def __init__(self, max_depth: int, max_features: int="all"):
         self.max_depth = max_depth
+        self.max_features = max_features
+
         self.ctree: Tree = None
 
-    def fit(self, x, y):
-        n_classes = len(np.unique(y))
-        n_features = x.shape[1]
+    def fit(self, X, y):
         depth = 0
         base = Tree(feature_name="base", prediction=np.round(np.mean(y)))
-        queue = [(base, x, y, depth)]
+
+        queue = [(base, X, y, depth)]
+        splitter = Splitter(n_classes=len(np.unique(y)), max_features=self.max_features)
 
         while queue:
             """
             Each node in the queue which are just terminal nodes get replaced by a split->prediction1/prediction2 construct.
             The old node gets removed from the queue and the new nodes get added to it
             """
-            c, x, y, d = queue.pop(0)
+            c, X, y, d = queue.pop(0)
             if len(np.unique(y)) <= 1 or d + 1 >= self.max_depth or len(np.unique(y)) == 1:
                 """
                 Adding a new layer would exceed the maximum depth of the tree or we have no more data left
@@ -46,11 +48,11 @@ class DecisionTreeClassifier(object):
                 continue
 
             # print("Trying to get split") TODO: remove
-            col, cutoff = best_split(x, y, n_classes, n_features)  # find the best split for the data at the node
+            col, cutoff = splitter.best_split(X, y)  # find the best split for the data at the node
             # print("Got split") TODO: remove
-            filter_ = x[:, col] < cutoff
-            x_left, y_left = x[filter_], y[filter_]
-            x_right, y_right = x[np.logical_not(filter_)], y[np.logical_not(filter_)]
+            filter_ = X[:, col] < cutoff
+            x_left, y_left = X[filter_], y[filter_]
+            x_right, y_right = X[np.logical_not(filter_)], y[np.logical_not(filter_)]
             # print(x_left, y_left, x_right, y_right, sep="\n") TODO: remove
 
             left_c, right_c = Tree(prediction=np.round(np.mean(y_left))), Tree(prediction=np.round(np.mean(y_right)))
@@ -83,13 +85,12 @@ if __name__ == '__main__':  # Test
     from sklearn.datasets import load_digits
 
     digits = load_digits()
-    x = digits.data
+    X = digits.data
     y = digits.target
-    classifier = DecisionTreeClassifier(10)
-    classifier.fit(x, y)
+    classifier = DecisionTreeClassifier(7, 15)
+    classifier.fit(X, y)
 
-    correct = np.sum(y == classifier.predict(x))
+    correct = np.sum(y == classifier.predict(X))
 
-    print(f"Out of {len(y)} observations, the decision tree with depth {classifier.max_depth} classified {correct} correctly")
-    # Output: Out of 1797 observations, the decision tree with depth 10 classified 1599 correctly
-    # Attention: The above tree is probably overfitting the data
+    print(f"Out of {len(y)} observations, the decision tree with depth {classifier.max_depth}"
+          f" and max_features {classifier.max_features} classified {correct} correctly.")
