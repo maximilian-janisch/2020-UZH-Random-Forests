@@ -12,12 +12,18 @@ class Tree:
 
         self.left = None
         self.right = None
-    # TODO: Repräsentierung des trees durch __repr__ ?
+
+    def __repr__(self):
+        if self.cutoff is not None:
+            return f"Splitting node which splits {self.feature_name} (index {self.feature_index}) at cutoff {self.cutoff}"
+        else:
+            return f"Terminal node with prediction {int(self.prediction)}"
 
 
 class DecisionTreeClassifier(object):
-    def __init__(self, max_depth):
+    def __init__(self, max_depth: int):
         self.max_depth = max_depth
+        self.ctree: Tree = None
 
     def fit(self, x, y):
         n_classes = len(np.unique(y))
@@ -54,16 +60,23 @@ class DecisionTreeClassifier(object):
             # TODO: feature_name !
 
             queue.extend([(left_c, x_left, y_left, d + 1), (right_c, x_right, y_right, d + 1)])
-        return base
+        self.ctree = base
 
     def predict(self, x):
-        # TODO: Testing !
-        return np.apply_along_axis(self._get_prediction, axis=1, arr=x)
+        return np.apply_along_axis(self.__prediction_for_row, axis=1, arr=x).astype(int)
 
-    def _get_prediction(self, row):
-        # TODO: Get prediction
-        # TODO: static method ?
-        pass
+    def __prediction_for_row(self, data_row):
+        base = self.ctree
+        if base is None:  # tree hasn't been fitted yet
+            raise Exception("This tree hasn't been fitted yet")
+
+        while base.feature_index is not None:
+            if data_row[base.feature_index] < base.cutoff:
+                base = base.left
+            else:
+                base = base.right
+
+        return base.prediction
 
 
 if __name__ == '__main__':  # Test
@@ -72,5 +85,11 @@ if __name__ == '__main__':  # Test
     digits = load_digits()
     x = digits.data
     y = digits.target
-    a = DecisionTreeClassifier(5)
-    classifier = a.fit(x, y)
+    classifier = DecisionTreeClassifier(10)
+    classifier.fit(x, y)
+
+    correct = np.sum(y == classifier.predict(x))
+
+    print(f"Out of {len(y)} observations, the decision tree with depth {classifier.max_depth} classified {correct} correctly")
+    # Output: Out of 1797 observations, the decision tree with depth 10 classified 1599 correctly
+    # Attention: The above tree is probably overfitting the data
