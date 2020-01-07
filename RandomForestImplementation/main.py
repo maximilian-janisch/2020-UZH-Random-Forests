@@ -41,19 +41,13 @@ class DecisionTreeClassifier:
             """
             c, X, y, d = queue.pop(0)
             if len(np.unique(y)) <= 1 or d + 1 >= self.max_depth or len(np.unique(y)) == 1:
-                """
-                Adding a new layer would exceed the maximum depth of the tree or we have no more data left
-                or further fitting to our data would not change the predictions (this happens if all the y are the same)
-                """
+                # Exceeding of the maximum depth of the tree or no more data left
                 continue
 
-            # print("Trying to get split") TODO: remove
             col, cutoff = splitter.best_split(X, y)  # find the best split for the data at the node
-            # print("Got split") TODO: remove
             filter_ = X[:, col] < cutoff
             x_left, y_left = X[filter_], y[filter_]
             x_right, y_right = X[np.logical_not(filter_)], y[np.logical_not(filter_)]
-            # print(x_left, y_left, x_right, y_right, sep="\n") TODO: remove
 
             left_c, right_c = Tree(prediction=np.round(np.mean(y_left))), Tree(prediction=np.round(np.mean(y_right)))
             c.left, c.right = left_c, right_c
