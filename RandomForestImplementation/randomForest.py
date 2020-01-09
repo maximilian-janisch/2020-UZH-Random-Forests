@@ -32,10 +32,24 @@ class RandomForestClassifier:
             self.forest.append(tree)
 
     def predict(self, X):
-        assert self.forest != []
+        """
+        Gives the predicted classes for the data X
+        :param X: n times p dimensional matrix (n is the number of observations and p the number of features)
+        :returns: n dimensional vector where the ith element of that vector corresponds to the predicted class of the ith row of X
+        """
+        if self.forest is None:  # forest hasn't been fitted yet
+            raise Exception("This forest hasn't been fitted yet")
 
-        predictions = np.vstack([tree.predict(X) for tree in self.forest])
-        return np.apply_along_axis(lambda column: np.bincount(column).argmax(), axis=0, arr=predictions)
+        n, p = X.shape
+        predictions = np.zeros(n)
+        for k in range(n):
+            row = X[[k], :]  # I am using [k] instead of k so that I get a 1 times k matrix instead of a vector
+            prediction = np.vstack([np.reshape(tree.predict_proba(row), -1) for tree in self.forest])
+            preferred_prediction = np.apply_along_axis(np.average, axis=0, arr=prediction).argmax()
+
+            predictions[k] = preferred_prediction
+
+        return predictions
 
 
 if __name__ == '__main__':  # Test
@@ -44,7 +58,7 @@ if __name__ == '__main__':  # Test
     digits = load_digits()
     X = digits.data
     y = digits.target
-    classifier = RandomForestClassifier(n_estimators=3)
+    classifier = RandomForestClassifier(n_estimators=10, max_depth=5)
     classifier.fit(X, y)
 
     correct = np.sum(y == classifier.predict(X))
