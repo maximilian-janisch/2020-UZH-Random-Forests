@@ -4,20 +4,27 @@ from RandomForestImplementation.helpers import Splitter
 
 
 class Tree:
-    def __init__(self, prediction, feature_index=None, feature_name=None, cutoff=None):
-        self.feature_name = feature_name
+    def __init__(self, class_counts: np.ndarray, feature_index=None, cutoff=None):
+        """
+        Initializes the tree class
+        :param class_counts: Number of elements of each class falling in this node. For example [1, 4] means that
+        class 0 occurs 1 time and class 1 occurs 4 times. If the tree is fully grown this list should contain all zeroes
+        at all indices except for exactly one.
+        :param feature_index: Index of the feature to split along
+        :param cutoff: Threshold of the split
+        """
         self.feature_index = feature_index
         self.cutoff = cutoff
-        self.prediction = prediction
+        self.class_counts = class_counts
 
         self.left = None
         self.right = None
 
     def __repr__(self):
         if self.cutoff is not None:
-            return f"Splitting node which splits {self.feature_name} (index {self.feature_index}) at cutoff {self.cutoff}"
+            return f"Splitting node which splits the feature with index {self.feature_index} at cutoff {self.cutoff}"
         else:
-            return f"Terminal node with prediction {int(self.prediction)}"
+            return f"Terminal node with class counts {self.class_counts}"
 
 
 class DecisionTreeClassifier:
@@ -35,19 +42,21 @@ class DecisionTreeClassifier:
         self.ctree: Tree = None
 
     def fit(self, X, y):
+        """Fits a single tree in order to predict y given X."""
         depth = 0
-        base = Tree(feature_name="base", prediction=np.round(np.mean(y)))
+        num_classes = len(np.unique(y))
+        base = Tree(class_counts=np.bincount(y))
 
         queue = [(base, X, y, depth)]
-        splitter = Splitter(n_classes=len(np.unique(y)), max_features=self.max_features)
+        splitter = Splitter(n_classes=num_classes, max_features=self.max_features)
 
         while queue:
             """
-            Each node in the queue which are just terminal nodes get replaced by a split->prediction1/prediction2 construct.
-            The old node gets removed from the queue and the new nodes get added to it
+            Each node in the queue is a terminal node. These nodes get replaced by a split->prediction1/prediction2 
+            construct. The original node gets removed from the queue and the new nodes get added to it
             """
             c, X, y, d = queue.pop(0)
-            if len(np.unique(y)) <= 1 or d + 1 >= self.max_depth or len(y) <= self.min_samples:
+            if len(np.unique(y)) <= 1 or len(y) <= self.min_samples or d + 1 >= self.max_depth:
                 # Exceeding of the maximum depth of the tree or no more data left
                 continue
 
@@ -56,19 +65,37 @@ class DecisionTreeClassifier:
             x_left, y_left = X[filter_], y[filter_]
             x_right, y_right = X[np.logical_not(filter_)], y[np.logical_not(filter_)]
 
-            left_c, right_c = Tree(prediction=np.round(np.mean(y_left))), Tree(prediction=np.round(np.mean(y_right)))
+            left_c = Tree(class_counts=np.bincount(y_left, minlength=num_classes))
+            right_c = Tree(class_counts=np.bincount(y_right, minlength=num_classes))
             c.left, c.right = left_c, right_c
             c.cutoff = cutoff
             c.feature_index = col
-            # TODO: feature_name !
 
             queue.extend([(left_c, x_left, y_left, d + 1), (right_c, x_right, y_right, d + 1)])
         self.ctree = base
 
     def predict(self, X):
-        return np.apply_along_axis(self.__prediction_for_row, axis=1, arr=X).astype(int)
+        """
+        Gives the predicted classes for the data X
+        :param X: n times p dimensional matrix (n is the number of observations and p the number of features)
+        :returns: n dimensional vector where the ith element of that vector corresponds to the predicted class of the ith row of X
+        """
+        return np.apply_along_axis(np.argmax, axis=1, arr=self.predict_proba(X)).astype(int)
 
-    def __prediction_for_row(self, x):
+    def predict_proba(self, X):
+        """
+        Predict predictions of the random tree for the data X in terms of probabilities
+        :param X: n times p dimensional matrix (n is the number of observations and p the number of features)
+        :return: n times m dimensional matrix (m is the number of classes)
+        """
+        return np.apply_along_axis(self.__prediction_of_probability_for_row, axis=1, arr=X)
+
+    def __prediction_of_probability_for_row(self, x):
+        """
+        Returns the probabilities with which the decision tree predicts that the data row x is associated to each class
+        :param x: p-dimensional vector, where p is the number of features
+        :returns: m-dimensional vector, where m is the number of classes, such that the elements of that vector are non-negative and sum to one
+        """
         base = self.ctree
         if base is None:  # tree hasn't been fitted yet
             raise Exception("This tree hasn't been fitted yet")
@@ -79,7 +106,7 @@ class DecisionTreeClassifier:
             else:
                 base = base.right
 
-        return base.prediction
+        return base.class_counts / np.sum(base.class_counts)
 
 
 if __name__ == '__main__':  # Test
