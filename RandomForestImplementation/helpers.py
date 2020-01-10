@@ -30,7 +30,7 @@ class Splitter:
 
         m = y.size  # number of samples
         p = X.shape[1]  # number of features
-        class_count = [np.sum(y == c) for c in range(self.n_classes)]  # class counts
+        class_count = [np.sum(y == c) for c in range(self.n_classes)]  # class counts Todo: Durch np.bincount ersetzen
 
         best_gini = 1.0 - sum((n / m) ** 2 for n in class_count)  # Gini impurity of current split
         best_idx, best_thr = None, None
