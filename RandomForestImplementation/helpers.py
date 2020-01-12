@@ -27,7 +27,6 @@ class Splitter:
         :param y: numpy array with shape (m, )
         :return: optimal split
         """
-        # print(X, y)  # Todo: remove
         m = y.size  # number of samples
         p = X.shape[1]  # number of features
         class_count = np.bincount(y, minlength=self.n_classes)
@@ -59,7 +58,6 @@ class Splitter:
             num_left = np.zeros(self.n_classes)
             num_right = class_count.copy()
             for i in range(1, m):  # possible split positions
-                # print(f"Current split position: {i} out of {m}")  # Todo: remove
                 c = features[i - 1]
                 num_left[c] += 1
                 num_right[c] -= 1
