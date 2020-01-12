@@ -61,6 +61,8 @@ class DecisionTreeClassifier:
                 continue
 
             col, cutoff = splitter.best_split(X, y)  # find the best split for the data at the node
+            if col is None:  # there is no split that reduces the Gini impurity
+                continue
             filter_ = X[:, col] < cutoff
             x_left, y_left = X[filter_], y[filter_]
             x_right, y_right = X[np.logical_not(filter_)], y[np.logical_not(filter_)]

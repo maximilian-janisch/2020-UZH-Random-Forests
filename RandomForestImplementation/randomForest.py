@@ -58,7 +58,7 @@ if __name__ == '__main__':  # Test
     digits = load_digits()
     X = digits.data
     y = digits.target
-    classifier = RandomForestClassifier(n_estimators=10, max_depth=5)
+    classifier = RandomForestClassifier(n_estimators=10)
     classifier.fit(X, y)
 
     correct = np.sum(y == classifier.predict(X))
