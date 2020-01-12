@@ -4,13 +4,14 @@ from RandomForestImplementation.decisionTree import DecisionTreeClassifier
 
 
 class RandomForestClassifier:
-    def __init__(self, n_estimators, max_features: int="sqrt", max_depth=np.Inf, min_samples=2):
+    def __init__(self, n_estimators, max_features: int="sqrt", max_depth=np.Inf, min_samples=2, random_state=None):
         """
         Initializes the RandomForestClassifier class
         :param n_estimators: Number of trees in the forest
         :param max_features: See DecisionTreeClassifier. Default is "sqrt" which leads to sqrt(n_features) features
         :param max_depth: See DecisionTreeClassifier
         :param min_samples: See DecisionTreeClassifier
+        :param random_state: Seed for the random number generators
         """
         self.n_estimators = n_estimators
         self.max_features = max_features
@@ -18,6 +19,9 @@ class RandomForestClassifier:
         self.min_samples = min_samples
 
         self.forest = []
+
+        if random_state is not None:
+            np.random.seed(random_state)
 
     def fit(self, X, y):
         self.forest = []  # this allows for fitting multiple times without getting duplicate trees
@@ -49,7 +53,7 @@ class RandomForestClassifier:
 
             predictions[k] = preferred_prediction
 
-        return predictions
+        return predictions.astype(int)
 
 
 if __name__ == '__main__':  # Test
