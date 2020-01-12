@@ -32,7 +32,7 @@ class Splitter:
         p = X.shape[1]  # number of features
         class_count = np.bincount(y, minlength=self.n_classes)
 
-        best_gini = np.sum(1 - (class_count / m) ** 2)  # Gini impurity of current split
+        best_gini = 1 - np.sum((class_count / m) ** 2)  # Gini impurity of current split
         best_idx, best_thr = None, None
 
         if self.max_features == "all":
@@ -55,16 +55,15 @@ class Splitter:
             thresholds = array[:, 0]
             features = array[:, 1].astype(int)
 
-            # Now we will loop through every threshold for the selected feature in order to get the optimal
-            # feature/threshold pair
+            # Now we will loop through every threshold for the selected feature in order to get the optimal feature/threshold pair
             num_left = np.zeros(self.n_classes)
             num_right = class_count.copy()
             for i in range(1, m):  # possible split positions
                 c = features[i - 1]
                 num_left[c] += 1
                 num_right[c] -= 1
-                gini_left = 1.0 - np.sum((num_left / i) ** 2)
-                gini_right = 1.0 - np.sum((num_right / (m - i)) ** 2)
+                gini_left = 1 - np.sum((num_left / i) ** 2)
+                gini_right = 1 - np.sum((num_right / (m - i)) ** 2)
 
                 # the Gini impurity of a split is the weighted average of the Gini impurity of the children.
                 gini = (i * gini_left + (m - i) * gini_right) / m
