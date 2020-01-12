@@ -30,9 +30,9 @@ class Splitter:
 
         m = y.size  # number of samples
         p = X.shape[1]  # number of features
-        class_count = [np.sum(y == c) for c in range(self.n_classes)]  # class counts Todo: Durch np.bincount ersetzen
+        class_count = np.bincount(y, minlength=self.n_classes)
 
-        best_gini = 1.0 - sum((n / m) ** 2 for n in class_count)  # Gini impurity of current split
+        best_gini = np.sum(1 - (class_count / m) ** 2)  # Gini impurity of current split
         best_idx, best_thr = None, None
 
         if self.max_features == "all":
@@ -50,24 +50,21 @@ class Splitter:
         # Loop through all features of the subset
         for idx in feature_subset:
             # Sort data along selected feature
-            thresholds, features = zip(*sorted(zip(X[:, idx], y)))
+            array = np.hstack([X[:, [idx]], y.reshape((-1, 1))])
+            array.sort(axis=0)
+            thresholds = array[:, 0]
+            features = array[:, 1].astype(int)
 
-            # We could actually split the node according to each feature/threshold pair
-            # and count the resulting population for each class in the children, but
-            # instead we compute them in an iterative fashion, making this for loop
-            # linear rather than quadratic.
-            num_left = [0] * self.n_classes
+            # Now we will loop through every threshold for the selected feature in order to get the optimal
+            # feature/threshold pair
+            num_left = np.zeros(self.n_classes)
             num_right = class_count.copy()
             for i in range(1, m):  # possible split positions
                 c = features[i - 1]
                 num_left[c] += 1
                 num_right[c] -= 1
-                gini_left = 1.0 - sum(
-                    (num_left[x] / i) ** 2 for x in range(self.n_classes)
-                )
-                gini_right = 1.0 - sum(
-                    (num_right[x] / (m - i)) ** 2 for x in range(self.n_classes)
-                )
+                gini_left = 1.0 - np.sum((num_left / i) ** 2)
+                gini_right = 1.0 - np.sum((num_right / (m - i)) ** 2)
 
                 # the Gini impurity of a split is the weighted average of the Gini impurity of the children.
                 gini = (i * gini_left + (m - i) * gini_right) / m
