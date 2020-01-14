@@ -92,6 +92,31 @@ class DecisionTreeClassifier:
         """
         return np.apply_along_axis(self.__prediction_of_probability_for_row, axis=1, arr=X)
 
+    def score(self, X, y):
+        """
+        Returns relative number of correctly predicted data rows.
+        Note: This function is used for compatibility with sklearns cross_validation utilities
+        :param X: Features to predict from
+        :param y: Correct labels
+        :return: Score between 0 (no rows correctly classified) and 1 (all labels correctly classified)
+        """
+        return (self.predict(X) == y).sum() / len(y)
+
+    def get_params(self, deep=True):
+        """
+        Gets parameters of the classifier.
+        Note: This function is required for compatibility with sklearns cross_validation utilities.
+        """
+        return {"max_depth": self.max_depth, "max_features": self.max_features, "min_samples": self.min_samples}
+
+    def set_params(self, **params):
+        """
+        Sets parameters for this classifier
+        Note: This function is required for compatibility with sklearns cross_validation utilities.
+        """
+        for key, value in params.items():
+            setattr(self, key, value)
+
     def __prediction_of_probability_for_row(self, x):
         """
         Returns the probabilities with which the decision tree predicts that the data row x is associated to each class
