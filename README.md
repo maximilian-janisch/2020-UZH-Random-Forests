@@ -1,5 +1,4 @@
 # Sustainable-Forest-Of-Codes
-Repository for the final project of the course An Introduction to Machine Learning by Marco and Maximilian
 
 ## Short Description
 This repository contains an implementation of the [Random Forest algorithm for classification](https://en.wikipedia.org/wiki/Random_forest). This algorithm is then applied to an artifically generated dataset about e-scooters. Also, the performance of the algorithm is compared to that of other common classification algorithms from the sklearn library.
