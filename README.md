@@ -16,8 +16,8 @@ Install Python 3.7 or newer from https://www.python.org/. Download all the files
 ### Todo:
 
 * ~~Test section~~
-* **Text for grid search**
-* **Text for explaratory Data Analysis**
+* ~~**Text for grid search**~~
+* ~~**Text for explaratory Data Analysis**~~
 * ~~Grid search~~
 * **Copy the code from the RandomForestImplementation folder into the Maximilian-Marco Notebook**
 * Warnings ?
