@@ -77,6 +77,8 @@ class OneVsOneClassifier:  # the purpose of this class is similar to the one fro
         for key, value in params.items():
             setattr(self, key, value)
 
+        return self
+
     @staticmethod
     def get_relabel(iterable):
         # "Factorizes" the data in iterable. For example [0,1,5,3,5,0] gets a mapper to [0,1,2,3,2,0]

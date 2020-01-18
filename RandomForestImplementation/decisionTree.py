@@ -117,6 +117,8 @@ class DecisionTreeClassifier:
         for key, value in params.items():
             setattr(self, key, value)
 
+        return self
+
     def __prediction_of_probability_for_row(self, x):
         """
         Returns the probabilities with which the decision tree predicts that the data row x is associated to each class

@@ -80,6 +80,8 @@ class RandomForestClassifier:
         for key, value in params.items():
             setattr(self, key, value)
 
+        return self
+
 if __name__ == '__main__':  # Test
     from sklearn.datasets import load_digits
 
