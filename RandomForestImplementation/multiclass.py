@@ -7,7 +7,6 @@ class OneVsOneClassifier:  # the purpose of this class is similar to the one fro
         Initializes the OvO classifier class
         :param estimator: Estimator to use (for example random forest)
         :param n_classes: Number of classes
-        :param args: Arguments to pass to the init of estimator
         :param kwargs: Keyword arguments to pass to the init of estimator
         """
         self.estimator = estimator
